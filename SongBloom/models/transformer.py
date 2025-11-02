@@ -92,7 +92,7 @@ class ScaledSinusoidalEmbedding(nn.Module):
         emb = einsum('i, j -> i j', pos, self.inv_freq)
         emb = torch.cat((emb.sin(), emb.cos()), dim = -1)
         return emb * self.scale
-    
+
 class RotaryEmbedding(nn.Module):
     def __init__(
         self,
@@ -154,16 +154,16 @@ class RotaryEmbedding2D(RotaryEmbedding):
     def __init__(self, dim, w, **kwargs):
         super().__init__(dim // 2, **kwargs)
         self.w = w
-        
-    
+
+
     def forward_from_seq_len(self, seq_len):
         device = self.inv_freq.device
         assert seq_len % self.w == 0 , f"{seq_len} % {self.w} != 0"
         h_len = seq_len // self.w
-        
+
         t_h = torch.arange(h_len, device = device)
         t_w = torch.arange(self.w, device = device)
-        
+
         return self.forward(t_h, t_w)
 
     @autocast('cuda', enabled = False)
@@ -174,17 +174,17 @@ class RotaryEmbedding2D(RotaryEmbedding):
         freq_w, scale_w = super().forward(repeat_t_w)
         freq = torch.stack([freq_h, freq_w], dim=-1) #h*w, D//2, 2
         freq = torch.cat(torch.unbind(freq, dim=-2), dim=-1)
-        
+
         if self.scale is None:
             scale = 1.
         else:
             scale = torch.stack([scale_h, scale_w], dim=-1)
             scale = torch.cat(torch.unbind(scale, dim=-2), dim=-1)
-            
+
         return freq, scale
-        
-        
-    
+
+
+
 
 def rotate_half(x):
     x = rearrange(x, '... (j d) -> ... j d', j = 2)
@@ -331,7 +331,7 @@ class Attention(nn.Module):
         self.causal = causal
 
         dim_kv = dim_context if dim_context is not None else dim
-        
+
         self.num_heads = dim // dim_heads
         self.kv_heads = dim_kv // dim_heads
 
@@ -369,8 +369,8 @@ class Attention(nn.Module):
 
     def flash_attn(
             self,
-            q, 
-            k, 
+            q,
+            k,
             v,
             mask = None,
             causal = None
@@ -395,7 +395,7 @@ class Attention(nn.Module):
 
         if q_len == 1 and causal:
             causal = False
-        
+
         if mask is not None:
             assert mask.ndim == 4
             mask = mask.expand(batch, heads, q_len, k_len)
@@ -424,7 +424,7 @@ class Attention(nn.Module):
             mask[..., 0] = mask[..., 0] | row_is_entirely_masked
 
             causal = False
-        
+
         with torch.backends.cuda.sdp_kernel(**self.sdp_kwargs):
             out = F.scaled_dot_product_attention(
                 q, k, v,
@@ -464,7 +464,7 @@ class Attention(nn.Module):
             # Use fused linear projection
             q, k, v = self.to_qkv(x).chunk(3, dim=-1)
             q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> b h n d', h = h), (q, k, v))
-        
+
         # Normalize q and k for cosine sim attention
         if self.qk_norm == "l2":
             q = F.normalize(q, dim=-1)
@@ -488,7 +488,7 @@ class Attention(nn.Module):
 
             q = q.to(q_dtype)
             k = k.to(k_dtype)
-        
+
         # TODO 这里这俩都是 [B, k/Q_len]这样的格式
         # context mask也许应该改成 [B, Q_len, K_len]
         # 并且下面flash_attn 默认假设attn靠左部分全为1
@@ -517,7 +517,7 @@ class Attention(nn.Module):
         if self.natten_kernel_size is not None:
             if natten is None:
                 raise ImportError('natten not installed, please install natten to use neighborhood attention')
-            
+
             dtype_in = q.dtype
             q, k, v = map(lambda t: t.to(torch.float32), (q, k, v))
 
@@ -542,14 +542,14 @@ class Attention(nn.Module):
                 )
                 q, k, v = map(lambda t: t.to(target_dtype), (q, k, v))
             q, k, v = map(lambda t: rearrange(t, 'b h n d -> b n h d'), (q, k, v))
-            # out = flash_attn_func(q, k, v, causal = causal) 
+            # out = flash_attn_func(q, k, v, causal = causal)
             if final_attn_mask is not None:
                 # Check if the mask meets the requirement of FlashAttn
                 kv_seq_mask = final_attn_mask.squeeze(dim=[1,2])
                 kv_reallens = kv_seq_mask.sum(dim=-1, dtype=torch.int32)
                 first_zero_indices = torch.argmax((kv_seq_mask == 0).int(), dim=1).masked_fill(kv_seq_mask[:,-1] != 0, kv_seq_mask.shape[1])
                 assert (kv_reallens == first_zero_indices).all(), f'{kv_reallens} , {first_zero_indices}'
-                
+
                 batch_size, kv_seq_len, num_key_value_heads, head_dim = k.shape
                 unpad_k, indices_k, cu_seqlens_k, max_seqlen_in_batch_k = unpad_input(k, kv_seq_mask)
                 unpad_v = index_first_axis(
@@ -573,8 +573,8 @@ class Attention(nn.Module):
                 out = pad_input(out_unpad, indices_q, batch_size, q_seq_len)
             else:
                 out = flash_attn_func(q, k, v, causal = causal)
-                
-                
+
+
             out = rearrange(out.to(fa_dtype_in), 'b n h d -> b h n d')
         # Fall back to PyTorch implementation
         elif self.use_pt_flash:
@@ -593,7 +593,7 @@ class Attention(nn.Module):
             kv_einsum_eq = 'b j d' if k.ndim == 3 else 'b h j d'
 
             dots = einsum(f'b h i d, {kv_einsum_eq} -> b h i j', q, k) * scale
-            
+
             i, j, dtype = *dots.shape[-2:], dots.dtype
 
             mask_value = -torch.finfo(dots.dtype).max
@@ -614,7 +614,7 @@ class Attention(nn.Module):
         out = rearrange(out, ' b h n d -> b n (h d)')
 
         # Communicate between heads
-        
+
         # with autocast(enabled = False):
         #     out_dtype = out.dtype
         #     out = out.to(torch.float32)
@@ -632,12 +632,12 @@ class ConformerModule(nn.Module):
         self,
         dim,
         norm_kwargs = {},
-    ):     
+    ):
 
         super().__init__()
 
         self.dim = dim
-        
+
         self.in_norm = LayerNorm(dim, **norm_kwargs)
         self.pointwise_conv = nn.Conv1d(dim, dim, kernel_size=1, bias=False)
         self.glu = GLU(dim, dim, nn.SiLU())
@@ -680,7 +680,7 @@ class TransformerBlock(nn.Module):
             ff_kwargs = {},
             norm_kwargs = {}
     ):
-        
+
         super().__init__()
         self.dim = dim
         self.dim_heads = dim_heads
@@ -708,7 +708,7 @@ class TransformerBlock(nn.Module):
                 zero_init_output=zero_init_branch_outputs,
                 **attn_kwargs
             )
-        
+
         self.ff_norm = LayerNorm(dim, **norm_kwargs) if not remove_norms else nn.Identity()
         self.ff = FeedForward(dim, zero_init_output=zero_init_branch_outputs, **ff_kwargs)
 
@@ -776,7 +776,7 @@ class TransformerBlock(nn.Module):
             x = x + self.ff(self.ff_norm(x))
 
         return x
-        
+
 class ContinuousTransformer(nn.Module):
     def __init__(
         self,
@@ -833,7 +833,7 @@ class ContinuousTransformer(nn.Module):
                 raise NotImplementedError
             self.pos_emb = AbsolutePositionalEmbedding(dim, abs_pos_emb_max_length)
 
-        
+
         if cross_atten_layer_idx is None:
             cross_atten_layer_idx = list(range(depth))
         for i in range(depth):
@@ -851,9 +851,9 @@ class ContinuousTransformer(nn.Module):
                     **kwargs
                 )
             )
-        
+
         self.apply(partial(self._init_weights,init_std=init_std))
-        
+
     def forward(
         self,
         x,
@@ -885,7 +885,7 @@ class ContinuousTransformer(nn.Module):
 
                 mask = torch.cat((prepend_mask, mask), dim = -1)
 
-        # Attention layers 
+        # Attention layers
 
         if self.rotary_pos_emb is not None:
             rotary_pos_emb = self.rotary_pos_emb.forward_from_seq_len(x.shape[1])
@@ -899,7 +899,7 @@ class ContinuousTransformer(nn.Module):
         context, context_mask = kwargs.pop('context', None), kwargs.pop("context_mask", None)
 
         for layer_idx, layer in enumerate(self.layers):
-            if layer.cross_attend:  
+            if layer.cross_attend:
                 x = layer(x, mask, global_cond, context, context_mask, rotary_pos_emb=rotary_pos_emb, **kwargs)
             else:
                 x = layer(x, mask, global_cond, rotary_pos_emb=rotary_pos_emb, **kwargs)
@@ -910,9 +910,9 @@ class ContinuousTransformer(nn.Module):
 
         if return_info:
             return x, info
-        
-        return x      
-        
+
+        return x
+
     def _init_weights(self, module, init_std=0.02):
         if isinstance(module, nn.Linear):
             module.weight.data.normal_(mean=0.0, std=init_std)

@@ -44,7 +44,7 @@ class DiscreteBottleneck(Bottleneck):
 
     def decode_tokens(self, codes, **kwargs):
         raise NotImplementedError
-    
+
 
 def checkpoint(function, *args, **kwargs):
     kwargs.setdefault("use_reentrant", False)
@@ -86,7 +86,7 @@ class SnakeBeta(nn.Module):
         x = snake_beta(x, alpha, beta)
 
         return x
-    
+
 def get_activation(activation: Literal["elu", "snake", "none"], antialias=False, channels=None) -> nn.Module:
     if activation == "elu":
         act = nn.ELU()
@@ -96,17 +96,17 @@ def get_activation(activation: Literal["elu", "snake", "none"], antialias=False,
         act = nn.Identity()
     else:
         raise ValueError(f"Unknown activation {activation}")
-    
+
     if antialias:
         from alias_free_torch import Activation1d
         act = Activation1d(act)
-    
+
     return act
 
 class ResidualUnit(nn.Module):
     def __init__(self, in_channels, out_channels, dilation, use_snake=False, antialias_activation=False):
         super().__init__()
-        
+
         self.dilation = dilation
 
         padding = (dilation * (7-1)) // 2
@@ -122,7 +122,7 @@ class ResidualUnit(nn.Module):
 
     def forward(self, x):
         res = x
-        
+
         #x = checkpoint(self.layers, x)
         x = self.layers(x)
 
@@ -155,7 +155,7 @@ class DecoderBlock(nn.Module):
             upsample_layer = nn.Sequential(
                 nn.Upsample(scale_factor=stride, mode="nearest"),
                 WNConv1d(in_channels=in_channels,
-                        out_channels=out_channels, 
+                        out_channels=out_channels,
                         kernel_size=2*stride,
                         stride=1,
                         bias=False,
@@ -181,17 +181,17 @@ class DecoderBlock(nn.Module):
         return self.layers(x)
 
 class OobleckEncoder(nn.Module):
-    def __init__(self, 
-                 in_channels=2, 
-                 channels=128, 
-                 latent_dim=32, 
-                 c_mults = [1, 2, 4, 8], 
+    def __init__(self,
+                 in_channels=2,
+                 channels=128,
+                 latent_dim=32,
+                 c_mults = [1, 2, 4, 8],
                  strides = [2, 4, 8, 8],
                  use_snake=False,
                  antialias_activation=False
         ):
         super().__init__()
-          
+
         c_mults = [1] + c_mults
 
         self.depth = len(c_mults)
@@ -199,7 +199,7 @@ class OobleckEncoder(nn.Module):
         layers = [
             WNConv1d(in_channels=in_channels, out_channels=c_mults[0] * channels, kernel_size=7, padding=3)
         ]
-        
+
         for i in range(self.depth-1):
             layers += [EncoderBlock(in_channels=c_mults[i]*channels, out_channels=c_mults[i+1]*channels, stride=strides[i], use_snake=use_snake)]
 
@@ -215,11 +215,11 @@ class OobleckEncoder(nn.Module):
 
 
 class OobleckDecoder(nn.Module):
-    def __init__(self, 
-                 out_channels=2, 
-                 channels=128, 
-                 latent_dim=32, 
-                 c_mults = [1, 2, 4, 8], 
+    def __init__(self,
+                 out_channels=2,
+                 channels=128,
+                 latent_dim=32,
+                 c_mults = [1, 2, 4, 8],
                  strides = [2, 4, 8, 8],
                  use_snake=False,
                  antialias_activation=False,
@@ -228,19 +228,19 @@ class OobleckDecoder(nn.Module):
         super().__init__()
 
         c_mults = [1] + c_mults
-        
+
         self.depth = len(c_mults)
 
         layers = [
             WNConv1d(in_channels=latent_dim, out_channels=c_mults[-1]*channels, kernel_size=7, padding=3),
         ]
-        
+
         for i in range(self.depth-1, 0, -1):
             layers += [DecoderBlock(
-                in_channels=c_mults[i]*channels, 
-                out_channels=c_mults[i-1]*channels, 
-                stride=strides[i-1], 
-                use_snake=use_snake, 
+                in_channels=c_mults[i]*channels,
+                out_channels=c_mults[i-1]*channels,
+                stride=strides[i-1],
+                use_snake=use_snake,
                 antialias_activation=antialias_activation,
                 use_nearest_upsample=use_nearest_upsample
                 )
@@ -301,7 +301,7 @@ class AudioAutoencoder(nn.Module):
         self.pretransform = pretransform
 
         self.soft_clip = soft_clip
- 
+
         self.is_discrete = self.bottleneck is not None and self.bottleneck.is_discrete
 
     def encode(self, audio, return_info=False, skip_pretransform=False, iterate_batch=False, **kwargs):
@@ -343,7 +343,7 @@ class AudioAutoencoder(nn.Module):
             latents, bottleneck_info = self.bottleneck.encode(latents, return_info=True, **kwargs)
 
             info.update(bottleneck_info)
-        
+
         if return_info:
             return latents, info
 
@@ -389,9 +389,9 @@ class AudioAutoencoder(nn.Module):
 
         if self.soft_clip:
             decoded = torch.tanh(decoded)
-        
+
         return decoded
-          
+
     def decode_tokens(self, tokens, **kwargs):
         '''
         Decode discrete tokens to audio
@@ -403,16 +403,16 @@ class AudioAutoencoder(nn.Module):
         latents = self.bottleneck.decode_tokens(tokens, **kwargs)
 
         return self.decode(latents, **kwargs)
-        
-    
+
+
 
     def encode_audio(self, audio, chunked=False, overlap=32, chunk_size=128, **kwargs):
         '''
         Encode audios into latents. Audios should already be preprocesed by preprocess_audio_for_encoder.
         If chunked is True, split the audio into chunks of a given maximum size chunk_size, with given overlap.
-        Overlap and chunk_size params are both measured in number of latents (not audio samples) 
-        # and therefore you likely could use the same values with decode_audio. 
-        A overlap of zero will cause discontinuity artefacts. Overlap should be => receptive field size. 
+        Overlap and chunk_size params are both measured in number of latents (not audio samples)
+        # and therefore you likely could use the same values with decode_audio.
+        A overlap of zero will cause discontinuity artefacts. Overlap should be => receptive field size.
         Every autoencoder will have a different receptive field size, and thus ideal overlap.
         You can determine it empirically by diffing unchunked vs chunked output and looking at maximum diff.
         The final chunk may have a longer overlap in order to keep chunk_size consistent for all chunks.
@@ -475,12 +475,12 @@ class AudioAutoencoder(nn.Module):
                 # paste the chunked audio into our y_final output audio
                 y_final[:,:,t_start:t_end] = y_chunk[:,:,chunk_start:chunk_end]
             return y_final
-    
+
     def decode_audio(self, latents, chunked=False, overlap=32, chunk_size=128, **kwargs):
         '''
-        Decode latents to audio. 
-        If chunked is True, split the latents into chunks of a given maximum size chunk_size, with given overlap, both of which are measured in number of latents. 
-        A overlap of zero will cause discontinuity artefacts. Overlap should be => receptive field size. 
+        Decode latents to audio.
+        If chunked is True, split the latents into chunks of a given maximum size chunk_size, with given overlap, both of which are measured in number of latents.
+        A overlap of zero will cause discontinuity artefacts. Overlap should be => receptive field size.
         Every autoencoder will have a different receptive field size, and thus ideal overlap.
         You can determine it empirically by diffing unchunked vs chunked audio and looking at maximum diff.
         The final chunk may have a longer overlap in order to keep chunk_size consistent for all chunks.
@@ -539,7 +539,7 @@ class AudioAutoencoder(nn.Module):
                 y_final[:,:,t_start:t_end] = y_chunk[:,:,chunk_start:chunk_end]
             return y_final
 
-        
+
 # AE factories
 
 def create_encoder_from_config(encoder_config: Dict[str, Any]):
@@ -550,7 +550,7 @@ def create_encoder_from_config(encoder_config: Dict[str, Any]):
         encoder = OobleckEncoder(
             **encoder_config["config"]
         )
-    
+
     elif encoder_type == "seanet":
         from encodec.modules import SEANetEncoder
         seanet_encoder_config = encoder_config["config"]
@@ -562,7 +562,7 @@ def create_encoder_from_config(encoder_config: Dict[str, Any]):
         )
     else:
         raise ValueError(f"Unknown encoder type {encoder_type}")
-    
+
     requires_grad = encoder_config.get("requires_grad", True)
     if not requires_grad:
         for param in encoder.parameters():
@@ -586,7 +586,7 @@ def create_decoder_from_config(decoder_config: Dict[str, Any]):
         )
     else:
         raise ValueError(f"Unknown decoder type {decoder_type}")
-    
+
     requires_grad = decoder_config.get("requires_grad", True)
     if not requires_grad:
         for param in decoder.parameters():
@@ -595,7 +595,7 @@ def create_decoder_from_config(decoder_config: Dict[str, Any]):
     return decoder
 
 def create_autoencoder_from_config(config: Dict[str, Any]):
-    
+
     # print(config)
     ae_config = config["model"]
 
@@ -653,13 +653,13 @@ if __name__ == "__main__":
         vae_model = create_autoencoder_from_config(config).cuda()
         model_ckpt_path = 'modelzoo/stable_audio_vae/autoencoder.ckpt'
         vae_model.load_state_dict(torch.load(model_ckpt_path)['state_dict'])
-        
-        
+
+
         input_audios, sr = torchaudio.load("music_example/加勒比海盗 主题.wav")
         input_audios = torchaudio.functional.resample(input_audios, sr, 48000)[...,:2048]
         input_audios = input_audios.unsqueeze(1).repeat(1, 2, 1).cuda()
         latents = vae_model.encode_audio(input_audios)
         recover_audio = vae_model.decode_audio(latents)
         print(recover_audio)
-    
+
     breakpoint()

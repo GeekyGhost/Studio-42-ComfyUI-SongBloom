@@ -85,19 +85,19 @@ class G2P_PinYin():
             else:
                 if subtext != []:
                     subtext = ''.join(subtext)
-                    pinyins = self.correct_pinyin_tone3(subtext) 
-                    pinyins = [f"<{i}>" for i in pinyins]   
+                    pinyins = self.correct_pinyin_tone3(subtext)
+                    pinyins = [f"<{i}>" for i in pinyins]
                     all_pinyins.append(' '+ ' '.join(pinyins)+ ' ')
                 all_pinyins.append(chr)
                 subtext = []
         if subtext != []:
             subtext = ''.join(subtext)
             pinyins = self.correct_pinyin_tone3(subtext)
-            pinyins = [f"<{i}>" for i in pinyins]     
+            pinyins = [f"<{i}>" for i in pinyins]
             all_pinyins.append(' '+ ' '.join(pinyins)+ ' ')
         # char_embeds = self.prosody.expand_for_phone(char_embeds, count_phone)
         return  ''.join(all_pinyins)
-    
+
     def correct_pinyin_tone3(self, text):
         pinyin_list = [
             p[0]

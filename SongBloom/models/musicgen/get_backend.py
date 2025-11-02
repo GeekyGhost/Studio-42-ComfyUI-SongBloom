@@ -35,30 +35,30 @@ def get_backend(name, dim, num_heads, num_layers, hidden_scale, init_std=0.02, r
             _attn_implementation="flash_attention_2" if _enable_flash_attention else "eager",
         )
         model = LlamaModel(model_cfg)
-        
+
     # SA -FF
     elif name == 'bart_enc':
         model_cfg = BartConfig(
             d_model=dim,
             max_position_embeddings=4096,
-            dropout=0., 
+            dropout=0.,
             use_cache=False,
             _attn_implementation="flash_attention_2" if _enable_flash_attention else "eager",
             activation_function='gelu',
             # for BartEncoder
-            encoder_layers=num_layers, 
+            encoder_layers=num_layers,
             encoder_attention_heads=num_heads,
             init_std=init_std,
             encoder_ffn_dim=dim * hidden_scale,
         )
         model = BartEncoder(model_cfg)
-        
+
     # SA - CA - FF
     elif name == 'bart_dec':
         model_cfg = BartConfig(
             d_model=dim,
             max_position_embeddings=4096,
-            dropout=0., 
+            dropout=0.,
             use_cache=False,
             _attn_implementation="flash_attention_2" if _enable_flash_attention else "eager",
             activation_function='gelu',

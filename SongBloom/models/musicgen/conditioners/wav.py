@@ -18,16 +18,16 @@ class AudioTokenizerConditioner(WaveformConditioner):
         super().__init__(output_dim, output_dim)
         self.max_len = max_len
         self.use_cache = cache
-        
+
         self.tokenizer = audio_tokenizer
         # breakpoint()
-        
+
         # TODO if cached and not load vae, receive a dict instead
         if isinstance(self.tokenizer, dict):
             self.tokenizer = omegaconf.DictConfig(self.tokenizer)
             self.code_depth = self.tokenizer.channel_dim
-            
-            
+
+
         elif isinstance(self.tokenizer, AbstractVAE):
             self.tokenizer_tp = "vae"
             if self.use_cache:
@@ -36,11 +36,11 @@ class AudioTokenizerConditioner(WaveformConditioner):
                 self.code_depth = 1 # TODO 强制把输入channel设成1了 self.tokenizer.input_channel
             self.output_proj = nn.Identity() if self.output_dim == self.tokenizer.channel_dim \
                             else nn.Linear(self.tokenizer.channel_dim, self.output_dim, bias=False)
-                            
+
         else:
             raise NotImplementedError
-        
-        
+
+
     def forward(self, x: WavCondition):
         wav, lengths, *_ = x
         B = wav.shape[0]
@@ -60,7 +60,7 @@ class AudioTokenizerConditioner(WaveformConditioner):
         # print(audio_latents.shape)
         if self.max_len is not None:
             audio_latents = pad_to_fix_length(audio_latents, self.max_len, 0.)
-                    
+
         if lengths is not None:
             lengths = torch.round(lengths.float() * audio_latents.shape[1] / wav.shape[-1])
             mask = length_to_mask(lengths, max_len=audio_latents.shape[1]).int()  # type: ignore
@@ -68,7 +68,7 @@ class AudioTokenizerConditioner(WaveformConditioner):
             mask = torch.ones((B, audio_latents.shape[1]), device=audio_latents.device,dtype=torch.int)
 
         audio_latents = audio_latents * mask[..., None]
-        
+
         return audio_latents, mask
-     
+
 

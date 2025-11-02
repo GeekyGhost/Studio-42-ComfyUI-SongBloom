@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from cn_zh_g2p import G2P_Mix, symbols
 
 key2processor = {
-    'pinyin': lambda: __import__('pinyin.pinyin', fromlist=['G2P_PinYin']).G2P_PinYin(), 
+    'pinyin': lambda: __import__('pinyin.pinyin', fromlist=['G2P_PinYin']).G2P_PinYin(),
     'phoneme': G2P_Mix(),
 }
 
@@ -45,7 +45,7 @@ def detect_structure(structure):
 
     if structure in ['verse', 'chorus', 'silence']:
         return structure
-    
+
     if structure in valid_start:
         return 'intro'
     if structure in valid_end:
@@ -69,7 +69,7 @@ def merge_structure(start_time, end_time, structure, lyric):
                 cnt += 1
         else:
             cnt += 1
-    
+
     return start_time, end_time, structure, lyric
 
 

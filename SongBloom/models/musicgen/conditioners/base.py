@@ -513,7 +513,7 @@ class JointEmbeddingConditioner(BaseConditioner):
         bins (int): Quantizers' codebooks size (used if quantize is true).
         kwargs: Additional parameters for residual vector quantizer.
     """
-    def __init__(self, dim: int, output_dim: int, 
+    def __init__(self, dim: int, output_dim: int,
                  autocast_dtype: tp.Optional[str] = 'float32', #quantize: bool = False,
                  **kwargs):
         super().__init__(dim=dim, output_dim=output_dim)
@@ -736,7 +736,7 @@ class ConditioningProvider(nn.Module):
         paths = defaultdict(list)
         seek_times = defaultdict(list)
         channels: int = 0
-        
+
         out = {}
         for sample in samples:
             for attribute in self.joint_embed_conditions:
@@ -747,7 +747,7 @@ class ConditioningProvider(nn.Module):
                 else:
                     assert channels == wav.size(1), "not all audio has same number of channels in batch"
                 assert wav.size(0) == 1, "Expecting single-wav batch in the collate method"
-                wav = einops.rearrange(wav, "b c t -> (b c t)")  # [1, C, T] => [C * T] 
+                wav = einops.rearrange(wav, "b c t -> (b c t)")  # [1, C, T] => [C * T]
                 wavs[attribute].append(wav)
                 texts[attribute].extend(text)
                 lengths[attribute].append(length)
@@ -838,14 +838,14 @@ class ConditionFuser(StreamingModule):
         prepend_input = input[:, :0]
         for cond_type, (cond, cond_mask) in conditions.items():
             op = self.cond2fuse[cond_type]
-            if op == 'sum': 
+            if op == 'sum':
                 input += cond
             elif op == 'input_interpolate':
                 cond = einops.rearrange(cond, "b t d -> b d t")
                 cond = F.interpolate(cond, size=input.shape[1])
                 input += einops.rearrange(cond, "b d t -> b t d")
             elif op == 'prepend':
-                prepend_input = torch.cat([cond.to(input.dtype), prepend_input], dim=1) 
+                prepend_input = torch.cat([cond.to(input.dtype), prepend_input], dim=1)
                 # NOTE 这里cond应该在后,这样顺序才符合配置文件,否则为逆序
                 # 但是之前实验是这样的为了保持一致就没改
             elif op == 'cross':

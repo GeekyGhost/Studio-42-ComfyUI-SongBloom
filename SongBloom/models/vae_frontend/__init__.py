@@ -19,7 +19,7 @@ class AbstractVAE(ABC, nn.Module):
     @abstractmethod
     def orig_sample_rate(self) -> int:
         ...
-    
+
 
     @property
     @abstractmethod
@@ -39,7 +39,7 @@ class AbstractVAE(ABC, nn.Module):
 
     def encode(self, wav) -> torch.Tensor:
         ...
-        
+
     def decode(self, latents) -> torch.Tensor:
         ...
 
@@ -58,7 +58,7 @@ class StableVAE(AbstractVAE):
             print("Warning: No VAE weights provided, using uninitialized VAE")
         self.sample_rate = sr
         self.rsp48k = torchaudio.transforms.Resample(sr, self.orig_sample_rate) if sr != self.orig_sample_rate else nn.Identity()
-       
+
     @torch.no_grad()
     def encode(self, wav: torch.Tensor, sample=True) -> tp.Tuple[torch.Tensor, tp.Optional[torch.Tensor]]:
         wav = self.rsp48k(wav)
@@ -70,16 +70,16 @@ class StableVAE(AbstractVAE):
             wav = wav.repeat(1, self.vae.in_channels, 1)
         latent = self.vae.encode_audio(wav) # B, 64, T
         return latent
-            
 
-        
+
+
     def decode(self, latents: torch.Tensor, **kwargs):
         # B, 64, T
         with torch.no_grad():
             audio_recon = self.vae.decode_audio(latents, **kwargs)
-            
+
         return audio_recon
-        
+
     @property
     def frame_rate(self) -> float:
         return float(self.vae.sample_rate) / self.vae.downsampling_ratio
@@ -95,7 +95,7 @@ class StableVAE(AbstractVAE):
     @property
     def split_bands(self) -> int:
         return 1
-    
+
     @property
     def input_channel(self) -> int:
         return self.vae.in_channels

@@ -20,7 +20,7 @@ def create_bottleneck_from_config(bottleneck_config):
         bottleneck = WassersteinBottleneck(**bottleneck_config.get("config", {}))
     else:
         raise NotImplementedError(f'Unknown bottleneck type: {bottleneck_type}')
-    
+
     requires_grad = bottleneck_config.get('requires_grad', True)
     if not requires_grad:
         for param in bottleneck.parameters():
@@ -98,7 +98,7 @@ class WassersteinBottleneck(Bottleneck):
         super().__init__(is_discrete=False)
         self.noise_augment_dim = noise_augment_dim
         self.bypass_mmd = bypass_mmd
-    
+
     def encode(self, x, return_info=False):
         info = {}
         if self.training and return_info:
@@ -121,7 +121,7 @@ class WassersteinBottleneck(Bottleneck):
 class L2Bottleneck(Bottleneck):
     def __init__(self):
         super().__init__(is_discrete=False)
-    
+
     def encode(self, x, return_info=False):
         info = {}
         x = F.normalize(x, dim=1)
@@ -129,6 +129,6 @@ class L2Bottleneck(Bottleneck):
             return x, info
         else:
             return x
-    
+
     def decode(self, x):
         return F.normalize(x, dim=1)

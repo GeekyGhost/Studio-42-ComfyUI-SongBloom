@@ -117,29 +117,29 @@ class SongBloomModelLoader:
     """
     
     @staticmethod
-    def _list_safetensors():
-        """List available .safetensors files in the checkpoints directory."""
+    def _list_checkpoints():
+        """List available checkpoint files (.safetensors and .pt) in the checkpoints directory."""
         checkpoints_dir = os.path.join(folder_paths.models_dir, "checkpoints")
         if not os.path.exists(checkpoints_dir):
             return []
-        return [f for f in os.listdir(checkpoints_dir) if f.endswith('.safetensors')]
+        return [f for f in os.listdir(checkpoints_dir) if f.endswith(('.safetensors', '.pt'))]
 
-    @classmethod
-    def INPUT_TYPES(cls):
-        safetensor_files = cls._list_safetensors()
-        safetensor_files = safetensor_files if safetensor_files else ["None found"]
-        return {
-            "required": {
-                "checkpoint": (safetensor_files, {"default": safetensor_files[0], "tooltip": "Pick a .safetensors checkpoint from models/checkpoints."}),
-                "dtype": (["float32", "bfloat16"], {"default": "bfloat16"}),
-                "audio_len": ("INT", {"default": 10, "min": 1, "max": 45, "step": 1}),
-                "model_type": (["songbloom_full_150s", "songbloom_full_150s_dpo", "songbloom_full_240s"],
-                              {"default": "songbloom_full_240s", "tooltip": "Select the SongBloom model variant"}),
-            },
-            "optional": {
-                "force_offload": ("BOOLEAN", {"default": True, "tooltip": "Force model offloading to CPU after loading"}),
-            }
+@classmethod
+def INPUT_TYPES(cls):
+    checkpoint_files = cls._list_checkpoints()
+    checkpoint_files = checkpoint_files if checkpoint_files else ["None found"]
+    return {
+        "required": {
+            "checkpoint": (checkpoint_files, {"default": checkpoint_files[0], "tooltip": "Pick a checkpoint file (.pt or .safetensors) from models/checkpoints."}),
+            "dtype": (["float32", "bfloat16"], {"default": "bfloat16"}),
+            "audio_len": ("INT", {"default": 10, "min": 1, "max": 45, "step": 1}),
+            "model_type": (["songbloom_full_150s", "songbloom_full_150s_dpo", "songbloom_full_240s"],
+                          {"default": "songbloom_full_240s", "tooltip": "Select the SongBloom model variant"}),
+        },
+        "optional": {
+            "force_offload": ("BOOLEAN", {"default": True, "tooltip": "Force model offloading to CPU after loading"}),
         }
+    }
     
     RETURN_TYPES = ("SONGBLOOM_MODEL",)
     RETURN_NAMES = ("model",)

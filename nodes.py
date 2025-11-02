@@ -25,7 +25,6 @@ except ImportError:
 
 # Disable flash attention for compatibility
 os.environ['DISABLE_FLASH_ATTN'] = "1"
-model_name = "songbloom_full_150s"
 
 # Global flag to track if resolvers are registered
 _RESOLVERS_REGISTERED = False
@@ -131,6 +130,8 @@ class SongBloomModelLoader:
         safetensor_files = safetensor_files if safetensor_files else ["None found"]
         return {
             "required": {
+                "model_type": (["songbloom_full_150s", "songbloom_full_150s_dpo", "songbloom_full_240s"],
+                              {"default": "songbloom_full_240s", "tooltip": "Select the SongBloom model variant"}),
                 "checkpoint": (safetensor_files, {"default": safetensor_files[0], "tooltip": "Pick a .safetensors checkpoint from models/checkpoints."}),
                 "dtype": (["float32", "bfloat16"], {"default": "bfloat16"}),
                 "audio_len": ("INT", {"default": 10, "min": 1, "max": 45, "step": 1}),
@@ -157,23 +158,23 @@ class SongBloomModelLoader:
         raw_cfg = OmegaConf.load(open(cfg_file, 'r'))
         return raw_cfg
     
-    def load_model(self, dtype: str, checkpoint: str, audio_len: int = 10, force_offload: bool = True, **kwargs):
+    def load_model(self, model_type: str, dtype: str, checkpoint: str, audio_len: int = 10, force_offload: bool = True, **kwargs):
         try:
             # Clean up memory before loading
             cleanup_memory()
-            
+
             # Get devices
             device, offload_device = get_devices()
-            
+
             print(f"Loading SongBloom model on device: {device}")
             if mm is not None:
                 debug_memory_usage(device)
-            
-            print(f"Preparing to load SongBloom model: {model_name}")
-            
+
+            print(f"Preparing to load SongBloom model: {model_type}")
+
             # All files are local now
             # Use config_dir from instance variable
-            cfg_path = os.path.join(self.config_dir, f"{model_name}.yaml")
+            cfg_path = os.path.join(self.config_dir, f"{model_type}.yaml")
             vae_cfg_path = os.path.join(self.config_dir, "stable_audio_1920_vae.json")
             g2p_path = os.path.join(self.config_dir, "vocab_g2p.yaml")
             model_safetensor = os.path.join(folder_paths.models_dir, "checkpoints", checkpoint)
@@ -214,6 +215,7 @@ class SongBloomModelLoader:
             # Create model config with loaded model
             model_config = {
                 "model": model,
+                "model_type": model_type,
                 "cfg": cfg,
                 "vae_cfg_path": vae_cfg_path,
                 "g2p_path": g2p_path,
@@ -267,7 +269,7 @@ class SongBloomGenerate:
                 "sampler": (["discrete_euler", "spiral", "pingpong"], {"default": "discrete_euler", "tooltip": "Choose the sampler: discrete_euler (default), spiral, or pingpong."}),
                 "dit_cfg_type": (["h", "global"], {"default": "h"}),
                 "top_k": ("INT", {"default": 100, "min": 1, "max": 1000, "step": 1}),
-                "max_duration": ("FLOAT", {"default": 30.0, "min": 1.0, "max": 250.0, "step": 1.0}),
+                "max_duration": ("FLOAT", {"default": 150.0, "min": 1.0, "max": 240.0, "step": 1.0, "tooltip": "Max duration in seconds. 150s models support up to 150s, 240s model supports up to 240s (4 minutes)"}),
                 "seed": ("INT", {"default": -1, "min": -1, "max": 2**32-1}),
                 "force_offload": ("BOOLEAN", {"default": True, "tooltip": "Force model offloading to CPU after generation"}),
             }

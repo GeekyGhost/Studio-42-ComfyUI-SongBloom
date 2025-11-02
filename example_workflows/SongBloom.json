@@ -90,7 +90,7 @@
       "title": "Instructions",
       "properties": {},
       "widgets_values": [
-        "## Installation\n1. Clone the repository to your custom_nodes folder:\n  ```\n  git clone https://github.com/fredconex/ComfyUI-SongBloom.git\n  cd ComfyUI-SongBloom\n  ```\n2. Install dependencies(Use the correct path for your comfyui portable):\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements.txt\n  ```\nOR if you want to use Chinese!\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements_chinese.txt\n  ```\n\n***Download to \"ComfyUI/models/checkpoints\":***<br> \n[songbloom_full_150s.safetensors](https://huggingface.co/fredconex/SongBloom-safetensors/blob/main/songbloom_full_150s.safetensors)\n\n\n**Lyric Format**<br>\n(You can ask GPT with the following prompt, please customize the content based on your requirements and double-check the generated lyrics)<br>\nPlease help me write original lyrics, which meet the following requirements:<br>\nThe lyrics contain both vocal and non-vocal sections. Vocal sections must contain a structure flag and lyric text, while non-vocal sections contain only structure flag;<br><br>\n***[verse] / [chorus] / [bridge]*** is prepended to each vocal section, indicating the structure of vocal ragion;<br><br>\n***[intro] / [inst] / [outro]*** is used to fulfill the non-vocal section (optional). The structure flag will be repeated based on the duration of non-vocal section (eg., 5-second intro, then [intro] × 5). Short non-vocal sections can be ignored;<br><br>\nFor lyric text, \".\" is used to separate each sentence."
+        "## Installation\n1. Clone the repository to your custom_nodes folder:\n  ```\n  git clone https://github.com/fredconex/ComfyUI-SongBloom.git\n  cd ComfyUI-SongBloom\n  ```\n2. Install dependencies(Use the correct path for your comfyui portable):\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements.txt\n  ```\nOR if you want to use Chinese!\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements_chinese.txt\n  ```\n\n***Download to \"ComfyUI/models/checkpoints\":***<br> \n[songbloom_full_150s.safetensors](https://huggingface.co/fredconex/SongBloom-safetensors/blob/main/songbloom_full_150s.safetensors)\n\n\n**Lyric Format**<br>\n(You can ask GPT with the following prompt, please customize the content based on your requirements and double-check the generated lyrics)<br>\nPlease help me write original lyrics, which meet the following requirements:<br>\nThe lyrics contain both vocal and non-vocal sections. Vocal sections must contain a structure flag and lyric text, while non-vocal sections contain only structure flag;<br><br>\n***[verse] / [chorus] / [bridge]*** is prepended to each vocal section, indicating the structure of vocal ragion;<br><br>\n***[intro] / [inst] / [outro]*** is used to fulfill the non-vocal section (optional). The structure flag will be repeated based on the duration of non-vocal section (eg., 5-second intro, then [intro] \u00d7 5). Short non-vocal sections can be ignored;<br><br>\nFor lyric text, \".\" is used to separate each sentence."
       ],
       "color": "#432",
       "bgcolor": "#653"
@@ -128,6 +128,7 @@
         "songbloom_full_150s.safetensors",
         "bfloat16",
         10,
+        "songbloom_full_150s",
         true
       ],
       "color": "#323",
@@ -331,7 +332,7 @@
         "discrete_euler",
         "h",
         100,
-        250,
+        240,
         1235,
         "fixed",
         "spiral"

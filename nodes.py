@@ -130,11 +130,11 @@ class SongBloomModelLoader:
         safetensor_files = safetensor_files if safetensor_files else ["None found"]
         return {
             "required": {
-                "model_type": (["songbloom_full_150s", "songbloom_full_150s_dpo", "songbloom_full_240s"],
-                              {"default": "songbloom_full_240s", "tooltip": "Select the SongBloom model variant"}),
                 "checkpoint": (safetensor_files, {"default": safetensor_files[0], "tooltip": "Pick a .safetensors checkpoint from models/checkpoints."}),
                 "dtype": (["float32", "bfloat16"], {"default": "bfloat16"}),
                 "audio_len": ("INT", {"default": 10, "min": 1, "max": 45, "step": 1}),
+                "model_type": (["songbloom_full_150s", "songbloom_full_150s_dpo", "songbloom_full_240s"],
+                              {"default": "songbloom_full_240s", "tooltip": "Select the SongBloom model variant"}),
             },
             "optional": {
                 "force_offload": ("BOOLEAN", {"default": True, "tooltip": "Force model offloading to CPU after loading"}),

@@ -1,0 +1,407 @@
+{
+  "id": "fc3fddd6-b814-41a1-bdd6-e70a3a0e59ca",
+  "revision": 0,
+  "last_node_id": 125,
+  "last_link_id": 258,
+  "nodes": [
+    {
+      "id": 46,
+      "type": "SoundFlow_Fade",
+      "pos": [
+        1270,
+        -290
+      ],
+      "size": [
+        210,
+        82
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 256
+        }
+      ],
+      "outputs": [
+        {
+          "name": "faded_audio",
+          "type": "AUDIO",
+          "links": [
+            91,
+            114
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "soundflow",
+        "ver": "9cb3775172417ce328b88036178dc2fc8a07dbb4",
+        "Node name for S&R": "SoundFlow_Fade"
+      },
+      "widgets_values": [
+        2,
+        5
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 125,
+      "type": "MarkdownNote",
+      "pos": [
+        1490,
+        -740
+      ],
+      "size": [
+        330,
+        510
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Suggestions",
+      "properties": {},
+      "widgets_values": [
+        "**Original Songbloom**\n```\ncfg_coef: 1.5\ntemperature: 0.90\ndiff_temp: 0.95\nsteps: 36\ntop_k: 100\nsampler: discrete_euler\n```\n\n**My personal preset**\n```\ncfg_coef: 1.3\ntemperature: 1.05\ndiff_temp: 0.90\nsteps: 25\ntop_k: 150\nsampler: spiral\n```"
+      ],
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 114,
+      "type": "MarkdownNote",
+      "pos": [
+        300,
+        -740
+      ],
+      "size": [
+        1180,
+        390
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "Instructions",
+      "properties": {},
+      "widgets_values": [
+        "## Installation\n1. Clone the repository to your custom_nodes folder:\n  ```\n  git clone https://github.com/fredconex/ComfyUI-SongBloom.git\n  cd ComfyUI-SongBloom\n  ```\n2. Install dependencies(Use the correct path for your comfyui portable):\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements.txt\n  ```\nOR if you want to use Chinese!\n  ```\n  C:\\ai_stuff\\ComfyUI_windows_portable\\python_embeded\\python.exe -m pip install -r requirements_chinese.txt\n  ```\n\n***Download to \"ComfyUI/models/checkpoints\":***<br> \n[songbloom_full_150s.safetensors](https://huggingface.co/fredconex/SongBloom-safetensors/blob/main/songbloom_full_150s.safetensors)\n\n\n**Lyric Format**<br>\n(You can ask GPT with the following prompt, please customize the content based on your requirements and double-check the generated lyrics)<br>\nPlease help me write original lyrics, which meet the following requirements:<br>\nThe lyrics contain both vocal and non-vocal sections. Vocal sections must contain a structure flag and lyric text, while non-vocal sections contain only structure flag;<br><br>\n***[verse] / [chorus] / [bridge]*** is prepended to each vocal section, indicating the structure of vocal ragion;<br><br>\n***[intro] / [inst] / [outro]*** is used to fulfill the non-vocal section (optional). The structure flag will be repeated based on the duration of non-vocal section (eg., 5-second intro, then [intro] × 5). Short non-vocal sections can be ignored;<br><br>\nFor lyric text, \".\" is used to separate each sentence."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 124,
+      "type": "SongBloomModelLoader",
+      "pos": [
+        300,
+        -290
+      ],
+      "size": [
+        270,
+        130
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "SONGBLOOM_MODEL",
+          "links": [
+            258
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "fredconex/ComfyUI-SongBloom",
+        "ver": "2533d5497f7b73ccae7c3012dcb405f231786a6e",
+        "Node name for S&R": "SongBloomModelLoader"
+      },
+      "widgets_values": [
+        "songbloom_full_150s.safetensors",
+        "bfloat16",
+        10,
+        true
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 77,
+      "type": "SoundFlow_TrimAudio",
+      "pos": [
+        300,
+        70
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 151
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            243
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "soundflow",
+        "ver": "9cb3775172417ce328b88036178dc2fc8a07dbb4",
+        "Node name for S&R": "SoundFlow_TrimAudio"
+      },
+      "widgets_values": [
+        0,
+        -1
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 3,
+      "type": "LoadAudio",
+      "pos": [
+        300,
+        -120
+      ],
+      "size": [
+        270,
+        136
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            151
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.41",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "Neon Reverie.mp3",
+        null,
+        null
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 42,
+      "type": "SaveAudioMP3",
+      "pos": [
+        1270,
+        80
+      ],
+      "size": [
+        550,
+        136
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 114
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.41",
+        "Node name for S&R": "SaveAudioMP3"
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "V0"
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 37,
+      "type": "SoundFlow_PreviewAudio",
+      "pos": [
+        1270,
+        -170
+      ],
+      "size": [
+        550,
+        210
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 91
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "autoSeek": false,
+        "duration": 142.72,
+        "audioUrl": "/api/view?filename=soundflow_preview_audio_d407482f-2332-498b-b8fe-b175e613f140_00002_.flac&type=temp&subfolder=&rand=0.48139593076733345",
+        "isPlaying": true,
+        "currentTime": 0,
+        "volume": 1,
+        "node_id": "d407482f-2332-498b-b8fe-b175e613f140"
+      },
+      "widgets_values": [],
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 117,
+      "type": "SongBloomGenerate",
+      "pos": [
+        580,
+        -290
+      ],
+      "size": [
+        680,
+        510
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "SONGBLOOM_MODEL",
+          "link": 258
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 243
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            256
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "fredconex/ComfyUI-SongBloom",
+        "ver": "2533d5497f7b73ccae7c3012dcb405f231786a6e",
+        "Node name for S&R": "SongBloomGenerate"
+      },
+      "widgets_values": [
+        "[intro] [intro] [intro] [intro] [intro] [intro] [intro] [intro]\n\n[verse]\nSunlight spills on the dusty ground.\nShadows stretch but make no sound.\nThe creak of the porch as we sway in tune.\nChasing whispers of an afternoon.\n\n[chorus]\nOh those sunny old days never fade.\nCarved in gold like a hand-made braid.\nWe'd run through the fields where the wild winds play.\nLost in the warmth of those sunny old days.\n\n[inst] [chorus] [inst] [chorus] [inst] [chorus] [inst] [chorus] \n\n[verse]\nBarefoot steps on the gravel trail.\nThe scent of rain in the summer gale.\nLaughter echoes where the tall grass bends.\nStories we swore would never end.\n\n[chorus]\nOh those sunny old days never fade.\nCarved in gold like a hand-made braid.\nWe'd run through the fields where the wild winds play.\nLost in the warmth of those sunny old days.\n\n[bridge]\nThe years may pull us far from here.\nBut in my heart they're always near.\nThe sky still holds that endless hue.\nAnd every sunbeam whispers you.\n\n[chorus]\nOh those sunny old days never fade.\nCarved in gold like a hand-made braid.\nWe'd run through the fields where the wild winds play.\nLost in the warmth of those sunny old days.\n\n[outro] [outro] [outro] [outro] [outro] [outro] [outro] [outro]",
+        1.5,
+        0.9000000000000001,
+        0.9500000000000002,
+        36,
+        true,
+        "discrete_euler",
+        "h",
+        100,
+        250,
+        1235,
+        "fixed",
+        "spiral"
+      ],
+      "color": "#323",
+      "bgcolor": "#535"
+    }
+  ],
+  "links": [
+    [
+      91,
+      46,
+      0,
+      37,
+      0,
+      "AUDIO"
+    ],
+    [
+      114,
+      46,
+      0,
+      42,
+      0,
+      "AUDIO"
+    ],
+    [
+      151,
+      3,
+      0,
+      77,
+      0,
+      "AUDIO"
+    ],
+    [
+      243,
+      77,
+      0,
+      117,
+      1,
+      "AUDIO"
+    ],
+    [
+      256,
+      117,
+      0,
+      46,
+      0,
+      "AUDIO"
+    ],
+    [
+      258,
+      124,
+      0,
+      117,
+      0,
+      "SONGBLOOM_MODEL"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.116781577942496,
+      "offset": [
+        -12.491936866099062,
+        803.4087940085618
+      ]
+    },
+    "frontendVersion": "1.23.4",
+    "ue_links": []
+  },
+  "version": 0.4
+}

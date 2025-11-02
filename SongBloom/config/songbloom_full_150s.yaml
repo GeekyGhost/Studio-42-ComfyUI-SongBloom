@@ -1,0 +1,76 @@
+cfg_file: 
+precision: 'bf16-mixed' # ['16-mixed', 'bf16-mixed']
+min_dur: 60
+max_dur: 150
+sr: 48000
+
+pretrained_path: ${dynamic_path:???/songbloom_full_150s.pt}
+continue_checkpoint: 
+
+train_dataset:
+  lyric_processor: phoneme
+  prompt_len: 10
+
+vae:
+  vae_cfg: ${dynamic_path:???/stable_audio_1920_vae.json}
+  vae_ckpt: ${dynamic_path:???/autoencoder_music_dsp1920.ckpt}
+  sr: ${sr}
+
+model: 
+  block_size: 16 
+  latent_dim: 64
+  dim: 1536
+  num_heads: 24
+  lm_layers: 36
+  diff_layers: 12
+  num_pitch: 16384
+  time_cond_type: prepend 
+  timestep_features_dim: 256
+  diffusion_objective: rectified_flow
+  timestep_sampler: logit_normal
+  backend: llama
+  rotary_base_val: 20000
+  init_std: 0.02
+  h_dropout: 0.05 
+
+  condition_provider_cfg:
+    prompt_wav:
+      type: audio_tokenizer_wrapper
+      output_dim: ${model.dim}
+      audio_tokenizer: 
+      max_len: 250 # 25.0 * 10s
+    lyrics:
+      type: phoneme_tokenizer
+      output_dim: ${model.dim}
+      vocab_list: ${load_yaml:${dynamic_path:???/vocab_g2p.yaml}}
+      max_len: 600
+      max_sentence_per_structure: 50
+      mode: sum
+
+
+  cfg_dropout: 0.1
+  attribute_dropout:
+    text:
+      lyrics: 0.
+    wav:
+      prompt_wav: 0.1
+
+  fuser_cfg:
+    cross_attention_pos_emb: false
+    cross_attention_pos_emb_scale: 1
+    sum: []
+    prepend: [lyrics, prompt_wav] 
+    cross: []      
+    input_interpolate: []
+
+
+
+inference:
+  cfg_coef: 1.5 
+  temp: 0.9
+  diff_temp: 0.95
+  top_k: 100
+  penalty_repeat: True
+  penalty_window: 50
+  steps: 36
+  dit_cfg_type: h
